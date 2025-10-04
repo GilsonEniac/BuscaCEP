@@ -1,5 +1,5 @@
 import { useState,useRef } from 'react'
-import {View,Text, StyleSheet, TextInput, TouchableOpacity} from 'react-native'
+import {View,Text, StyleSheet, TextInput, TouchableOpacity,Keyboard} from 'react-native'
 
 
 import api from './scr/Services/api'
@@ -9,12 +9,14 @@ import api from './scr/Services/api'
 export default function App(){
 
 const [cep, setCep] = useState('');
+const [cepPesquisa, setCepPesquisa] = useState(null);
 const inputRef = useRef(null);
 
 
 function limpar(){
   setCep("")
   inputRef.current.focus();
+  setCepPesquisa(null)
 }
 
 async function buscar(){
@@ -24,9 +26,13 @@ async function buscar(){
     return;
   }
 
-  const response = await api.get('/06783020/json')
-  console.log(response.data)
+  try{
+  const response = await api.get(`/${cep}/json`)
+  setCepPesquisa(response.data)
+  Keyboard.dismiss(); // garante que o teclado será fechado
+  }catch(error){  alert('ERROR: ' + error)
 
+  };
 
 
 
@@ -63,14 +69,21 @@ return(
       </TouchableOpacity>
     </View>  
 
+  
+  
+  
+    {cepPesquisa &&
+  
     <View style={myStyles.resultado}>
-      <Text style={myStyles.itemText}>CEP: 06767020</Text>
-      <Text style={myStyles.itemText}>Logradouro: 06767020</Text>
-      <Text style={myStyles.itemText}>Bairro: 06767020</Text>
-      <Text style={myStyles.itemText}>Cidade: 06767020</Text>
-      <Text style={myStyles.itemText}>Estado: 06767020</Text>
+      <Text style={myStyles.itemText}>CEP: {cepPesquisa.cep}</Text>
+      <Text style={myStyles.itemText}>Logradouro: {cepPesquisa.logradouro}</Text>
+      <Text style={myStyles.itemText}>Bairro: {cepPesquisa.bairro}</Text>
+      <Text style={myStyles.itemText}>Cidade: {cepPesquisa.localidade}</Text>
+      <Text style={myStyles.itemText}>Estado: {cepPesquisa.estado}</Text>
 
     </View>
+
+    }
 
   </View>
 
@@ -127,7 +140,7 @@ const myStyles = StyleSheet.create({
     alignItems: 'center',
   },
   itemText:{
-    fontSize: 22,
+    fontSize: 18,
   }
 
   
